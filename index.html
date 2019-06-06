@@ -3,6 +3,8 @@
 <head>
 <script type="text/javascript" src="js/three.js"></script>
 <script type="text/javascript" src="js/jquery.js"></script>
+<script type="text/javascript" src="js/TransformControls.js"></script>
+<script type="text/javascript" src="js/OrbitControls.js"></script>
 <meta charset="UTF-8">
 <title>threejs-basic-geometry</title>
 <style>
@@ -92,22 +94,50 @@ z3:<input size=4 value=-4></input>
 <script type="text/javascript">
 
 function init() {
+  /* renderer */
   var renderer = new THREE.WebGLRenderer({
 	 canvas: document.getElementById('mainCanvas')
   });
 
-  // renderer.setSize(800, 600);//设置窗口尺寸
-  var camera = createCamera();
-  var scene = new THREE.Scene();
-  renderer.setClearColor(new THREE.Color(0x000000)); // init the background color
-  addLightSource(scene);
-  scene.add(createPlane());
-  // scene.add(createCube());
-  // scene.add(createCylinder());
+  /* camera */
+  var camera = new THREE.PerspectiveCamera( 50, $("#mainCanvas").width() / $("#mainCanvas").height(), 1, 3000 );
+  camera.position.set( 1000, 500, 1000 );
+  camera.lookAt( 0, 200, 0 );
 
-  setInterval(function () {
+  /* scene */
+  var scene = new THREE.Scene();
+  scene.add( new THREE.GridHelper( 1000, 10 ) );
+
+  /* light source */
+  var light = new THREE.DirectionalLight( 0xffffff, 2 );
+  light.position.set( 1, 1, 1 );
+  scene.add( light );
+
+  var render = function() {
 	renderer.render(scene, camera);
-  }, 1.0/60);
+  }
+
+  scene.add( new THREE.GridHelper( 1000, 10 ) );
+
+  var orbit = new THREE.OrbitControls( camera, renderer.domElement );
+  orbit.update();
+  orbit.addEventListener( 'change', render );
+
+  control = new THREE.TransformControls( camera, renderer.domElement );
+  control.addEventListener( 'change', render );
+
+  control.addEventListener( 'dragging-changed', function ( event ) {
+	  orbit.enabled = ! event.value;
+  });
+
+  var geometry = new THREE.BoxBufferGeometry( 200, 200, 200 );
+  var material = new THREE.MeshLambertMaterial( { color: 0x003300, transparent: true } );
+  var cube = new THREE.Mesh(geometry, material);
+
+  scene.add(cube);
+
+  control.attach(cube);
+  scene.add( control );
 
   $("#shapeSel").change(function() {
 	var shapes = new Array("cube", "mesh", "sphere", "line", "cylinder");
