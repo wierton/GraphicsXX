@@ -632,10 +632,12 @@
 
 		/* add line */
 		var geometry = new THREE.Geometry();
+		/*
 		console.log("line.origin is ");
 		console.log(origin);
 		console.log("line.to is ");
 		console.log(intersect);
+		*/
 		geometry.vertices.push(origin);
 		geometry.vertices.push(intersect);
 		var material = new THREE.LineBasicMaterial( { color: 0xffffff } );
@@ -651,7 +653,6 @@
 		if (intersects.length == 0) {
 		  is_last = true;
 		  intersects = raycaster.intersectObject(container);
-		  console.log(intersects);
 		}
 
 		for (var i in intersects) {
@@ -662,8 +663,8 @@
 		  var face = intersects[i].face;
 		  if (is_last || !face) return null;
 		  return {
-			intersect: intersects[i].point,
-			face_norm: face.normal,
+			intersect: intersects[i].point.clone(),
+			face_norm: face.normal.clone(),
 		  };
 		}
 		return null;
@@ -676,6 +677,8 @@
 		var N = ret.face_norm;
 		var L = direction;
 		var newOrigin = ret.intersect;
+		console.log("depth is " + depth);
+		console.log(N);
 		// var newOrigin = new THREE.Vector3(200, 200, 200);
 		var newDirection = N.multiplyScalar(2 * (N.dot(L))).sub(L).normalize();
 		newDirection = (new THREE.Vector3(0, 0, 0)).sub(newDirection);
@@ -726,7 +729,7 @@
 
 	  $("#mainCanvas").click(function(e) {
 		if (toogleRayCastingMode) {
-		  console.log("add-ray");
+		  /* console.log("add-ray"); */
 		  addRay(e);
 		} else {
 		  controlAttachNewObject(e);
