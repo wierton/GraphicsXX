@@ -470,20 +470,20 @@
 
             </ul>
 
+			<!--
             <ul>
               <li class="title">
 				RayCasting
               </li>
 
-              <li class="cr function">
+              <li class="cr function" id="addRay-commit">
                 <div>
-                  <span class="property-name">trace depth</span>
-				  <input size=6  id="traceDepth" value=1>
-				  </input>
+                  <span class="property-name">add ray</span>
                 </div>
               </li>
 
             </ul>
+			-->
 
           </div>
         </li>
@@ -529,7 +529,6 @@
 	  var rayCasters = new Array();
 
       var render = function () {
-		drawCastingRays();
         renderer.render(scene, camera);
       }
 
@@ -603,51 +602,45 @@
 		}
 	  }
 
-	  function drawCastingRayWithIntersect(origin, intersect) {
-		/* add sphere */
-		var sphereGeo = new THREE.SphereGeometry(10);
-		var sphereMat = new THREE.MeshBasicMaterial({ color: 0x00FFFF });
-		var sphereMesh = new THREE.Mesh(sphereGeo, sphereMat);
-		var p = intersect;
-		sphereMesh.position.set(p.x, p.y, p.z);
-		helperShapes.push(sphereMesh);
-		scene.add(sphereMesh);
-
-		/* add line */
-		var geometry = new THREE.Geometry();
-		geometry.vertices.push(origin);
-		geometry.vertices.push(intersect);
-		var material = new THREE.LineBasicMaterial( { color: 0xffffff } );
-		var line = new THREE.Line(geometry, material);
-		helperShapes.push(line);
-		scene.add(line);
+	  function drawCastingRay() {
 	  }
 
-	  function drawCastingRayWithDirection(origin, direction) {
-		var raycaster = new THREE.Raycaster(origin, direction);
-		var intersects = raycaster.intersectObjects(scene.children);
-		if(intersects.length > 0) {
-		  /* console.log(intersects[0].face.normal); */
-		  for (var i in intersects) {
-			var distance = intersects[i].distance;
-			if (distance < 0.001) continue;
-			drawCastingRayWithIntersect(origin, intersects[i].point);
-			break;
-		  }
-		}
-	  }
-
-	  var helperShapes = new Array();
 	  function drawCastingRays() {
-		for (var l in helperShapes) {
-		  scene.remove(helperShapes[l]);
-		}
+		for (var i in rayCasters) {
+		  var raycaster = rawCasters[i];
+		  var intersects = raycaster.intersectObjects(scene.children);
+		  if(intersects.length > 0) {
+		    /* console.log(intersects[0].face.normal); */
+		    for (i in intersects) {
+			  var distance = intersects[i].distance;
+			  if (distance < 0.001) continue;
 
-		var d = parseInt($("#traceDepth").val());
-		for (var l in rayCasters) {
-		  var origin = rayCasters[l].origin;
-		  var direction = rayCasters[l].direction;
-		  drawCastingRayWithDirection(origin, direction);
+			  /* add sphere */
+			  var sphereGeo = new THREE.SphereGeometry(10);
+			  var sphereMat = new THREE.MeshBasicMaterial({
+				color: 0x00FFFF,
+				wireframe: false
+			  });
+			  var sphereMesh = new THREE.Mesh(sphereGeo, sphereMat);
+			  var p = intersects[i].point;
+			  sphereMesh.position.set(p.x, p.y, p.z);
+			  scene.add(sphereMesh);
+
+			  /* add line */
+			  var geometry = new THREE.Geometry();
+			  geometry.vertices.push(camera.position);
+			  geometry.vertices.push(intersects[i].point);
+
+			  var material = new THREE.LineBasicMaterial( { color: 0xffffff } );
+
+			  console.log(geometry.vertices);
+			  var line = new THREE.Line(geometry, material);
+			  scene.add(line);
+
+			  render();
+			  break;
+		    }
+		  }
 		}
 	  }
 
@@ -656,18 +649,14 @@
 		var W = $("#mainCanvas").width();
 		var H = $("#mainCanvas").height();
 
-		var mouse = new THREE.Vector3();
+		var mouse = new THREE.Vector2();
 		mouse.x = (e.clientX / W) * 2 - 1;
 		mouse.y = -(e.clientY / H) * 2 + 1;
-		mouse.z = 0.5;
 
-		var pos = mouse.unproject(camera);
-		rayCasters.push({
-		  origin: camera.position.clone(),
-		  direction: (pos.sub(camera.position)).normalize()
-		});
+		var raycaster = new THREE.Raycaster();
+		raycaster.setFromCamera(mouse, camera);
+		rayCasters.add(raycaster);
 
-		render();
 	  }
 
 	  $("#mainCanvas").click(function(e) {
