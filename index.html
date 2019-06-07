@@ -6,7 +6,6 @@
   <script type="text/javascript" src="js/jquery.js"></script>
   <script type="text/javascript" src="js/TransformControls.js"></script>
   <script type="text/javascript" src="js/OrbitControls.js"></script>
-  <!-- link rel="stylesheet" type="text/css" href="css/main.css" -->
 
   <style>
     #panel #content .link {
@@ -417,281 +416,239 @@
       <ul style="height: auto;">
         <li class="folder">
           <div class="dg">
+            
             <ul>
               <li class="title">States</li>
               <li class="cr string">
                 <div><span class="property-name">state</span>
-                  <div class="c"><select>
-                      <option value="Idle">Idle</option>
-                      <option value="Walking">Walking</option>
-                      <option value="Running">Running</option>
-                      <option value="Dance">Dance</option>
-                      <option value="Death">Death</option>
-                      <option value="Sitting">Sitting</option>
-                      <option value="Standing">Standing</option>
-                    </select></div>
-                </div>
-              </li>
-            </ul>
-          </div>
-        </li>
-        <li class="folder">
-          <div class="dg">
-            <ul>
-              <li class="title">Emotes</li>
-              <li class="cr function">
-                <div><span class="property-name">Jump</span>
                   <div class="c">
-                    <div class="button"></div>
-                  </div>
-                </div>
-              </li>
-              <li class="cr function">
-                <div><span class="property-name">Yes</span>
-                  <div class="c">
-                    <div class="button"></div>
-                  </div>
-                </div>
-              </li>
-              <li class="cr function">
-                <div><span class="property-name">No</span>
-                  <div class="c">
-                    <div class="button"></div>
-                  </div>
-                </div>
-              </li>
-              <li class="cr function">
-                <div><span class="property-name">Wave</span>
-                  <div class="c">
-                    <div class="button"></div>
-                  </div>
-                </div>
-              </li>
-              <li class="cr function">
-                <div><span class="property-name">Punch</span>
-                  <div class="c">
-                    <div class="button"></div>
-                  </div>
-                </div>
-              </li>
-              <li class="cr function">
-                <div><span class="property-name">ThumbsUp</span>
-                  <div class="c">
-                    <div class="button"></div>
+                    <select id="controlMode">
+                      <option value="translate">Normal</option>
+                      <option value="scale">Scale</option>
+                      <option value="rotate">Rotate</option>
+                    </select>
                   </div>
                 </div>
               </li>
             </ul>
-          </div>
-        </li>
-        <li class="folder">
-          <div class="dg">
+
             <ul>
-              <li class="title">Expressions</li>
-              <li class="cr number has-slider">
-                <div><span class="property-name">Angry</span>
+              <li class="title">
+                AddShape
+              </li>
+              <li class="cr string">
+                
+                <div>
+                  <span class="property-name">shape</span>
                   <div class="c">
-                    <div><input type="text"></div>
-                    <div class="slider">
-                      <div class="slider-fg" style="width: 0%;"></div>
+                    <select id="AddShape-shape">
+                      <option value="cube">cube</option>
+                      <option value="mesh">mesh</option>
+                      <option value="cylinder">cylinder</option>
+                      <option value="line">line</option>
+                    </select>
+                  </div>
+                </div>
+              </li>
+
+              <li class="cr string">
+                <div>
+                  <span class="property-name">color</span>
+                  <div class="c">
+                    <input size=6 id="AddShape-color" value=0xFFFF00>
+                    </input>
+                  </div>
+                </div>
+              </li>
+
+              <li class="cr function" id="addShape-commit">
+                <div>
+                  <span class="property-name">commit</span>
+                  <div class="c">
+                    <div class="button">
+
                     </div>
                   </div>
                 </div>
               </li>
-              <li class="cr number has-slider">
-                <div><span class="property-name">Surprised</span>
-                  <div class="c">
-                    <div><input type="text"></div>
-                    <div class="slider">
-                      <div class="slider-fg" style="width: 0%;"></div>
-                    </div>
-                  </div>
-                </div>
-              </li>
-              <li class="cr number has-slider">
-                <div><span class="property-name">Sad</span>
-                  <div class="c">
-                    <div><input type="text"></div>
-                    <div class="slider">
-                      <div class="slider-fg" style="width: 0%;"></div>
-                    </div>
-                  </div>
-                </div>
-              </li>
+
             </ul>
           </div>
         </li>
       </ul>
-      <div class="close-button" style="width: 245px;">Close Controls</div>
+        
+      <!--div class="close-button" style="width: 245px;">Close Controls</div -->
     </div>
   </div>
 
   <div>
     <canvas id="mainCanvas"></canvas>
-    <div>
+  </div>
 
-      <script type="text/javascript">
+  <script type="text/javascript">
 
-        function init() {
-          /* renderer */
-          var renderer = new THREE.WebGLRenderer({
-            canvas: document.getElementById('mainCanvas')
-          });
+    function init() {
+      /* renderer */
+      var renderer = new THREE.WebGLRenderer({
+        canvas: document.getElementById('mainCanvas')
+      });
 
-          renderer.setPixelRatio(window.devicePixelRatio);
-          renderer.setSize(window.innerWidth, window.innerHeight);
+      renderer.setPixelRatio(window.devicePixelRatio);
+      renderer.setSize(window.innerWidth, window.innerHeight);
 
-          /* camera */
-          var camera = new THREE.PerspectiveCamera(50, $("#mainCanvas").width() / $("#mainCanvas").height(), 1, 3000);
-          camera.position.set(1000, 500, 1000);
-          camera.lookAt(0, 200, 0);
+      /* camera */
+      var camera = new THREE.PerspectiveCamera(50, $("#mainCanvas").width() / $("#mainCanvas").height(), 1, 3000);
+      camera.position.set(1000, 500, 1000);
+      camera.lookAt(0, 200, 0);
 
-          /* scene */
-          var scene = new THREE.Scene();
-          scene.add(new THREE.GridHelper(1000, 10));
+      /* scene */
+      var scene = new THREE.Scene();
+      scene.add(new THREE.GridHelper(1000, 10));
 
-          /* light source */
-          var light = new THREE.DirectionalLight(0xffffff, 2);
-          light.position.set(1, 1, 1);
-          scene.add(light);
+      /* light source */
+      var light = new THREE.DirectionalLight(0xffffff, 2);
+      light.position.set(1, 1, 1);
+      scene.add(light);
 
-          var render = function () {
-            renderer.render(scene, camera);
+      var render = function () {
+        renderer.render(scene, camera);
+      }
+
+      scene.add(new THREE.GridHelper(1000, 10));
+
+      /* init controls */
+      var orbit = new THREE.OrbitControls(camera, renderer.domElement);
+      orbit.update();
+      orbit.addEventListener('change', render);
+
+      control = new THREE.TransformControls(camera, renderer.domElement);
+      control.addEventListener('change', render);
+
+      control.addEventListener('dragging-changed', function (event) {
+        orbit.enabled = !event.value;
+      });
+
+      /* add a sample cube */
+      var geometry = new THREE.BoxBufferGeometry(200, 200, 200);
+      var material = new THREE.MeshLambertMaterial({ color: 0x003300, transparent: true });
+      var cube = new THREE.Mesh(geometry, material);
+
+      scene.add(cube);
+
+      /* control attach to */
+      control.attach(cube);
+      scene.add(control);
+
+      $("#controlMode").change(function () {
+        var mode = $("#controlMode").val();
+        // console.log(mode);
+        control.setMode(mode);
+      });
+
+      $("#shapeSel").change(function () {
+        var shapes = new Array("cube", "mesh", "sphere", "line", "cylinder");
+
+        for (var i in shapes) {
+          var optId = "#" + shapes[i] + "Options";
+          if ($("#shapeSel").val() == shapes[i]) {
+            $(optId).show();
+          } else {
+            $(optId).hide();
           }
-
-          scene.add(new THREE.GridHelper(1000, 10));
-
-          /* init controls */
-          var orbit = new THREE.OrbitControls(camera, renderer.domElement);
-          orbit.update();
-          orbit.addEventListener('change', render);
-
-          control = new THREE.TransformControls(camera, renderer.domElement);
-          control.addEventListener('change', render);
-
-          control.addEventListener('dragging-changed', function (event) {
-            orbit.enabled = !event.value;
-          });
-
-          /* add a sample cube */
-          var geometry = new THREE.BoxBufferGeometry(200, 200, 200);
-          var material = new THREE.MeshLambertMaterial({ color: 0x003300, transparent: true });
-          var cube = new THREE.Mesh(geometry, material);
-
-          scene.add(cube);
-
-          /* control attach to */
-          control.attach(cube);
-          scene.add(control);
-
-          $("#rotate").click(function () {
-            control.setMode("rotate");
-          });
-
-          $("#shapeSel").change(function () {
-            var shapes = new Array("cube", "mesh", "sphere", "line", "cylinder");
-
-            for (var i in shapes) {
-              var optId = "#" + shapes[i] + "Options";
-              if ($("#shapeSel").val() == shapes[i]) {
-                $(optId).show();
-              } else {
-                $(optId).hide();
-              }
-            }
-          });
-
-          $("#addShape").click(function () {
-            var val = $("#shapeSel").val();
-            if (val == "cube") {
-              var x = parseFloat($("#cube-x").val());
-              var y = parseFloat($("#cube-y").val());
-              var z = parseFloat($("#cube-z").val());
-              var L = parseFloat($("#cube-L").val());
-              var W = parseFloat($("#cube-W").val());
-              var H = parseFloat($("#cube-H").val());
-              console.log(new Array(x, y, z, L, W, H));
-              var cubeGeo = new THREE.CubeGeometry(x, y, z);
-              var material = new THREE.MeshLambertMaterial({
-                color: 0x003300,
-                wireframe: false
-              });
-              var cube = new THREE.Mesh(cubeGeo, material);
-              cube.position.set(x, y, z);
-              scene.add(cube);
-            }
-          });
         }
+      });
 
-        init(); // from here
-
-        function createCamera() {
-          var camera;
-          camera = new THREE.PerspectiveCamera(30, window.innerWidth / window.innerHeight, 1, 1000);
-          camera.position.set(100, 300, 100);//设置相机位置
-          camera.lookAt(new THREE.Vector3(0, 0, 0));//让相机指向原点
-          return camera;
-        }
-
-        function addLightSource(scene) {
-          var ambientLight = new THREE.AmbientLight(0x606060);
-          scene.add(ambientLight);
-
-          /* parallel light */
-          var directionalLight = new THREE.DirectionalLight(0xffffff);
-          directionalLight.position.set(1, 0.75, 0.5).normalize();
-          scene.add(directionalLight);
-        }
-
-        function createPlane() {
-          var planeGeo = new THREE.PlaneGeometry(100, 100, 10, 10);//创建平面
-          var planeMat = new THREE.MeshLambertMaterial({  //创建材料
-            color: 0x666666,
-            wireframe: false
-          });
-          var planeMesh = new THREE.Mesh(planeGeo, planeMat);//创建网格模型
-          planeMesh.position.set(0, 0, -20);//设置平面的坐标
-          planeMesh.rotation.x = -0.5 * Math.PI;//将平面绕X轴逆时针旋转90度
-          return planeMesh;//将平面添加到场景中
-        }
-
-        function createCube() {
-          var cubeGeo = new THREE.CubeGeometry(20, 20, 20, 5, 5, 5);//创建立方体
-          var cubeMat = new THREE.MeshLambertMaterial({//创建材料
+      $("#addShape-commit").click(function () {
+        var val = $("#shapeSel").val();
+        if (val == "cube") {
+          var x = parseFloat($("#cube-x").val());
+          var y = parseFloat($("#cube-y").val());
+          var z = parseFloat($("#cube-z").val());
+          var L = parseFloat($("#cube-L").val());
+          var W = parseFloat($("#cube-W").val());
+          var H = parseFloat($("#cube-H").val());
+          console.log(new Array(x, y, z, L, W, H));
+          var cubeGeo = new THREE.CubeGeometry(x, y, z);
+          var material = new THREE.MeshLambertMaterial({
             color: 0x003300,
             wireframe: false
           });
-          var cubeMesh = new THREE.Mesh(cubeGeo, cubeMat);//创建立方体网格模型
-          cubeMesh.position.set(20, 10, 0);//设置立方体的坐标
-          return cubeMesh;//将立方体添加到场景中
+          var cube = new THREE.Mesh(cubeGeo, material);
+          cube.position.set(x, y, z);
+          scene.add(cube);
         }
+      });
+    }
 
-        function createSphere() {
-          var sphereGeo = new THREE.SphereGeometry(16, 40, 40);//创建球体
-          var sphereMat = new THREE.MeshLambertMaterial({//创建材料
-            color: 0x0000FF,
-            wireframe: false
-          });
-          var sphereMesh = new THREE.Mesh(sphereGeo, sphereMat);//创建球体网格模型
-          sphereMesh.position.set(-25, 10, 0);//设置球的坐标
-          return sphereMesh;
-        }
+    init(); // from here
 
-        function createCylinder() {
-          var cylinderGeo = new THREE.CylinderGeometry(15, 15, 40, 40, 40);
-          var cylinderMat = new THREE.MeshLambertMaterial({//创建材料
-            color: 0xFF6600,
-            wireframe: false
-          });
+    function createCamera() {
+      var camera;
+      camera = new THREE.PerspectiveCamera(30, window.innerWidth / window.innerHeight, 1, 1000);
+      camera.position.set(100, 300, 100);//设置相机位置
+      camera.lookAt(new THREE.Vector3(0, 0, 0));//让相机指向原点
+      return camera;
+    }
 
-          //创建圆柱体网格模型
-          var cylinderMesh = new THREE.Mesh(cylinderGeo, cylinderMat);
-          cylinderMesh.position.set(0, 20, -40);//设置圆柱坐标
-          return cylinderMesh;//向场景添加圆柱体
-        }
+    function addLightSource(scene) {
+      var ambientLight = new THREE.AmbientLight(0x606060);
+      scene.add(ambientLight);
+
+      /* parallel light */
+      var directionalLight = new THREE.DirectionalLight(0xffffff);
+      directionalLight.position.set(1, 0.75, 0.5).normalize();
+      scene.add(directionalLight);
+    }
+
+    function createPlane() {
+      var planeGeo = new THREE.PlaneGeometry(100, 100, 10, 10);//创建平面
+      var planeMat = new THREE.MeshLambertMaterial({  //创建材料
+        color: 0x666666,
+        wireframe: false
+      });
+      var planeMesh = new THREE.Mesh(planeGeo, planeMat);//创建网格模型
+      planeMesh.position.set(0, 0, -20);//设置平面的坐标
+      planeMesh.rotation.x = -0.5 * Math.PI;//将平面绕X轴逆时针旋转90度
+      return planeMesh;//将平面添加到场景中
+    }
+
+    function createCube() {
+      var cubeGeo = new THREE.CubeGeometry(20, 20, 20, 5, 5, 5);//创建立方体
+      var cubeMat = new THREE.MeshLambertMaterial({//创建材料
+        color: 0x003300,
+        wireframe: false
+      });
+      var cubeMesh = new THREE.Mesh(cubeGeo, cubeMat);//创建立方体网格模型
+      cubeMesh.position.set(20, 10, 0);//设置立方体的坐标
+      return cubeMesh;//将立方体添加到场景中
+    }
+
+    function createSphere() {
+      var sphereGeo = new THREE.SphereGeometry(16, 40, 40);//创建球体
+      var sphereMat = new THREE.MeshLambertMaterial({//创建材料
+        color: 0x0000FF,
+        wireframe: false
+      });
+      var sphereMesh = new THREE.Mesh(sphereGeo, sphereMat);//创建球体网格模型
+      sphereMesh.position.set(-25, 10, 0);//设置球的坐标
+      return sphereMesh;
+    }
+
+    function createCylinder() {
+      var cylinderGeo = new THREE.CylinderGeometry(15, 15, 40, 40, 40);
+      var cylinderMat = new THREE.MeshLambertMaterial({//创建材料
+        color: 0xFF6600,
+        wireframe: false
+      });
+
+      //创建圆柱体网格模型
+      var cylinderMesh = new THREE.Mesh(cylinderGeo, cylinderMat);
+      cylinderMesh.position.set(0, 20, -40);//设置圆柱坐标
+      return cylinderMesh;//向场景添加圆柱体
+    }
 
 
-      </script>
+  </script>
 </body>
 
 </html>
