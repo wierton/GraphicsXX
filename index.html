@@ -15,7 +15,7 @@
   </style>
 
   <meta charset="UTF-8">
-  <title>threejs-basic-geometry</title>
+  <title>GraphicsXX</title>
   <style>
     body {
       font-family: Monospace;
@@ -434,6 +434,20 @@
             </ul>
 
             <ul>
+              <li class="title">Camera</li>
+              <li class="cr string">
+                <div><span class="property-name">camera types</span>
+                  <div class="c">
+                    <select id="cameraType">
+                      <option value="PerspectiveCamera">PerspectiveCamera</option>
+                      <option value="OrthographicCamera">OrthographicCamera</option>
+                    </select>
+                  </div>
+                </div>
+              </li>
+            </ul>
+
+            <ul>
               <li class="title">
                 AddShape
               </li>
@@ -446,7 +460,7 @@
                       <option value="cube">cube</option>
                       <option value="plane">plane</option>
                       <option value="cylinder">cylinder</option>
-                      <option value="line">line</option>
+                      <option value="sphere">sphere</option>
                     </select>
                   </div>
                 </div>
@@ -458,6 +472,18 @@
                   <div class="c">
                     <input size=6 id="AddShape-color" value=0xFFFF00>
                     </input>
+                  </div>
+                </div>
+              </li>
+
+              <li class="cr string">
+                <div>
+                  <span class="property-name">material</span>
+                  <div class="c">
+                    <select id="AddShape-material">
+                      <option value="planeReflection">plane reflection</option>
+                      <option value="diffuseReflection">diffuse reflection</option>
+                    </select>
                   </div>
                 </div>
               </li>
@@ -475,14 +501,13 @@
 				RayCasting
               </li>
 
-              <li class="cr function">
+              <li class="cr string">
                 <div>
                   <span class="property-name">trace depth</span>
 				  <input size=6  id="traceDepth" value=2>
 				  </input>
                 </div>
               </li>
-
             </ul>
 
           </div>
@@ -499,7 +524,7 @@
 
   <script type="text/javascript">
 
-    // function init() {
+    function init() {
       /* renderer */
       var renderer = new THREE.WebGLRenderer({
         canvas: document.getElementById('mainCanvas')
@@ -511,13 +536,18 @@
 	  var projector=new THREE.Projector();
 
       /* camera */
-      var camera = new THREE.PerspectiveCamera(50, $("#mainCanvas").width() / $("#mainCanvas").height(), 1, 3000);
+	  var mWidth = $("#mainCanvas").width();
+	  var mHeight = $("#mainCanvas").height();
+      var perspectiveCamera = new THREE.PerspectiveCamera(50, mWidth / mHeight, 1, 3000);
+	  var orthographicCamera = new THREE.OrthographicCamera(mWidth / - 2, mWidth / 2, mHeight / 2, mHeight / - 2, 1, 8000 );
+
+	  var camera = orthographicCamera;
       camera.position.set(1000, 500, 1000);
       camera.lookAt(0, 200, 0);
 
       /* scene */
       var scene = new THREE.Scene();
-      scene.add(new THREE.GridHelper(1000, 10));
+      /* scene.add(new THREE.GridHelper(1000, 10)); */
 	  
       /* the container */
       var containerGeometry = new THREE.CubeGeometry(2000, 2000, 2000);
@@ -533,9 +563,16 @@
 	  var helperShapes = new Array();
 
       /* light source */
+	  /*
       var light = new THREE.DirectionalLight(0xffffff, 2);
       light.position.set(1, 1, 1);
+	  */
+      var light = new THREE.PointLight(0xffffff);
+      light.position.set(1000, 1000, 1000);
       scene.add(light);
+
+	  var ambientLight = new THREE.AmbientLight("#ffffff");
+	  scene.add(ambientLight);
 
 	  var rayCasters = new Array();
 
@@ -551,11 +588,11 @@
       orbit.update();
       orbit.addEventListener('change', render);
 
-      control = new THREE.TransformControls(camera, renderer.domElement);
+      var control = new THREE.TransformControls(camera, renderer.domElement);
       control.addEventListener('change', render);
 
-      control.addEventListener('dragging-changed', function (event) {
-        orbit.enabled = !event.value;
+      control.addEventListener('dragging-changed', function (e) {
+        orbit.enabled = !e.value;
       });
 
       /* add a sample cube */
@@ -604,7 +641,7 @@
 		var raycaster=new THREE.Raycaster();
 		raycaster.setFromCamera(mouse, camera);
 
-		var intersects=raycaster.intersectObjects(scene.children);
+		var intersects = raycaster.intersectObjects(scene.children);
 		for (var i in intersects) {
 		  var distance = intersects[i].distance;
 		  if (distance < 0.001) continue;
@@ -620,24 +657,20 @@
 		}
 	  }
 
-	  function drawCastingRayWithIntersect(origin, intersect) {
+	  function drawCastingRayWithIntersect(origin, intersect, is_last) {
 		/* add sphere */
-		var sphereGeo = new THREE.SphereGeometry(10);
-		var sphereMat = new THREE.MeshBasicMaterial({ color: 0x00FFFF });
-		var sphereMesh = new THREE.Mesh(sphereGeo, sphereMat);
-		var p = intersect;
-		sphereMesh.position.set(p.x, p.y, p.z);
-		helperShapes.push(sphereMesh);
-		scene.add(sphereMesh);
+		if (!is_last) {
+		  var sphereGeo = new THREE.SphereGeometry(10);
+		  var sphereMat = new THREE.MeshBasicMaterial({ color: 0x00FFFF });
+		  var sphereMesh = new THREE.Mesh(sphereGeo, sphereMat);
+		  var p = intersect;
+		  sphereMesh.position.set(p.x, p.y, p.z);
+		  helperShapes.push(sphereMesh);
+		  scene.add(sphereMesh);
+		}
 
 		/* add line */
 		var geometry = new THREE.Geometry();
-		/*
-		console.log("line.origin is ");
-		console.log(origin);
-		console.log("line.to is ");
-		console.log(intersect);
-		*/
 		geometry.vertices.push(origin);
 		geometry.vertices.push(intersect);
 		var material = new THREE.LineBasicMaterial( { color: 0xffffff } );
@@ -659,7 +692,8 @@
 		  /* console.log(intersects[i].face.normal); */
 		  var distance = intersects[i].distance;
 		  assert (distance >= 0.001);
-		  drawCastingRayWithIntersect(origin, intersects[i].point);
+		  drawCastingRayWithIntersect(origin, intersects[i].point, is_last);
+		  if (intersects[i].object.isDiffuse) return null;
 		  var face = intersects[i].face;
 		  if (is_last || !face) return null;
 		  return {
@@ -677,8 +711,6 @@
 		var N = ret.face_norm;
 		var L = direction;
 		var newOrigin = ret.intersect;
-		console.log("depth is " + depth);
-		console.log(N);
 		// var newOrigin = new THREE.Vector3(200, 200, 200);
 		var newDirection = N.multiplyScalar(2 * (N.dot(L))).sub(L).normalize();
 		newDirection = (new THREE.Vector3(0, 0, 0)).sub(newDirection);
@@ -727,6 +759,20 @@
 		render();
 	  }
 
+	  $("#cameraType").change(function () {
+		var cameraType = $("#cameraType").val();
+		var p = camera.position;
+		if (cameraType == "PerspectiveCamera") {
+		  // perspectiveCamera.position.set(p.x, p.y, p.z);
+		  camera = perspectiveCamera;
+		  console.log("switch camera to PerspectiveCamera");
+		} else {
+		  // orthographicCamera.position.set(p.x, p.y, p.z);
+		  camera = orthographicCamera;
+		  console.log("switch camera to orthographicCamera");
+		}
+	  });
+
 	  $("#mainCanvas").click(function(e) {
 		if (toogleRayCastingMode) {
 		  /* console.log("add-ray"); */
@@ -754,18 +800,16 @@
         }
       });
 
-      $("#addShape-commit").click(function () {
+	  function createShape() {
 		var color = parseInt($("#AddShape-color").val(), 16);
 		var shape = $("#AddShape-shape").val();
 		if (shape == "cube") {
-		  var cubeGeo = new THREE.CubeGeometry(50, 50, 50);
+		  var cubeGeo = new THREE.CubeGeometry(100, 100, 100);
 		  var cubeMat = new THREE.MeshLambertMaterial({
 			color: color,
 			wireframe: false
 		  });
-		  var cubeMesh = new THREE.Mesh(cubeGeo, cubeMat);
-		  cubeMesh.position.set(20, 10, 0);
-		  scene.add(cubeMesh);
+		  return new THREE.Mesh(cubeGeo, cubeMat);
 		} else if(shape == "plane") {
 		  var planeGeo = new THREE.PlaneGeometry(100, 100);
 		  var planeMat = new THREE.MeshLambertMaterial({
@@ -773,27 +817,34 @@
 			wireframe: false,
 			side:THREE.DoubleSide
 		  });
-		  var planeMesh = new THREE.Mesh(planeGeo, planeMat);
-		  planeMesh.position.set(0, 0, -20);
-		  scene.add(planeMesh);
+		  return new THREE.Mesh(planeGeo, planeMat);
 		} else if(shape == "cylinder") {
-		  var cylinderGeo = new THREE.CylinderGeometry(15, 15, 40, 40, 40);
+		  var cylinderGeo = new THREE.CylinderGeometry(100, 100, 40, 40, 40);
 		  var cylinderMat = new THREE.MeshLambertMaterial({
 			color: color,
 			wireframe: false
 		  });
 
-		  var cylinderMesh = new THREE.Mesh(cylinderGeo, cylinderMat);
-		  cylinderMesh.position.set(0, 20, -40);
-		  scene.add(cylinderMesh);
-		} else if(shape == "line") {
+		  return new THREE.Mesh(cylinderGeo, cylinderMat);
+		} else if(shape == "sphere") {
+		  var sphereGeo = new THREE.SphereGeometry(100);
+		  var sphereMat = new THREE.MeshBasicMaterial({ color: color });
+		  return new THREE.Mesh(sphereGeo, sphereMat);
 		}
+		assert(false);
+	  }
 
+      $("#addShape-commit").click(function () {
+		var isDiffuse = $("#AddShape-material").val() == "diffuseReflection";
+		var shape = createShape();
+		shape.isDiffuse = isDiffuse;
+		shape.position.set(0, 0, 0);
+		scene.add(shape);
 		render();
       });
-    // }
+    }
 
-    // init(); 
+    init(); 
 
     function createCamera() {
       var camera;
