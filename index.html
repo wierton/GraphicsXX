@@ -611,6 +611,7 @@
       scene.add(cube);
 
       /* control attach to */
+	  var attachedShape = cube;
       control.attach(cube);
       scene.add(control);
 
@@ -621,17 +622,47 @@
 		camera = newCamera;
 		scene.remove(control);
 		control = newControl;
-		newControl.attach(cube);
+		newControl.attach(attachedShape);
 		scene.add(control);
 	  }
 
 	  var toogleRayCastingMode = false;
 	  window.addEventListener("keydown", function (e) {
+		console.log(e.keyCode);
 		switch (e.keyCode) {
 		  case 17: // Ctrl
 			toogleRayCastingMode = true;
 			break;
+		  case 87: // W
+			attachedShape.position.y += 10;
+			break;
+		  case 83: // S
+			attachedShape.position.y -= 10;
+			break;
+		  case 65: // A
+			attachedShape.position.x += 10;
+			break;
+		  case 68: // D
+			attachedShape.position.x -= 10;
+			break;
+		  case 81: // Q
+			attachedShape.position.z += 10;
+			break;
+		  case 69: // E
+			attachedShape.position.z -= 10;
+			break;
+		  case 74: // J
+			attachedShape.scale.x -= 0.1;
+			attachedShape.scale.y -= 0.1;
+			attachedShape.scale.z -= 0.1;
+			break;
+		  case 75: // K
+			attachedShape.scale.x += 0.1;
+			attachedShape.scale.y += 0.1;
+			attachedShape.scale.z += 0.1;
+			break;
 		}
+		render();
 	  });
 
 	  window.addEventListener("keyup", function (e) {
@@ -641,6 +672,17 @@
 			break;
 		}
 	  });
+
+	  function onWindowResize() {
+		mWidth = $("#mainCanvas").width();
+		mHeight = $("#mainCanvas").height();
+		camera.aspect = mWidth / mHeight;
+		camera.updateProjectionMatrix();
+		renderer.setSize( mWidth, mHeight );
+		render();
+	  }
+
+	  window.addEventListener('resize', onWindowResize, false);
 
 	  function assert(bCondition) {
 		if (!bCondition) {
@@ -664,6 +706,7 @@
 		for (var i in intersects) {
 		  var distance = intersects[i].distance;
 		  if (distance < 0.001) continue;
+		  attachedShape = intersects[i].object;
 		  control.attach(intersects[i].object);
 
 		  /* console.log(intersects[0].face.normal); */
